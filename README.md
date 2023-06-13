@@ -58,7 +58,7 @@ git clone https://github.com/alexy201/awsdocsgpt.git
 ```bash
 cd frontend
 npm i
-cd ..
+cd ../backend
 pip install -r requirements.txt
 ```
 
