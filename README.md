@@ -97,7 +97,7 @@ Please be patient! Depending on the number of links inputted, this process will 
 
 ### App
 
-8. Run entire app
+7. Run entire app
 
 ```bash
 cd backend
