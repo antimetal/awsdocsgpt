@@ -97,9 +97,12 @@ Please be patient! Depending on the number of links inputted, this process will 
 
 ### App
 
-8. Run app
+8. Run entire app
 
 ```bash
+cd backend
+uvicorn app.main:app --reload
+cd ../frontend
 npm run dev
 ```
 
