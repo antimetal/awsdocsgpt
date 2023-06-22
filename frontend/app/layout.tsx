@@ -4,6 +4,7 @@ import { Metadata } from "next"
 import { siteConfig } from "@/config/site"
 import { fontSans } from "@/lib/fonts"
 import { cn } from "@/lib/utils"
+import { Footer } from "@/components/footer"
 import { SiteHeader } from "@/components/site-header"
 import { TailwindIndicator } from "@/components/tailwind-indicator"
 import { ThemeProvider } from "@/components/theme-provider"
@@ -52,18 +53,23 @@ export default function RootLayout({ children }: RootLayoutProps) {
             fontSans.variable
           )}
         >
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <div className="relative flex min-h-screen flex-col">
-              <SiteHeader />
-              <div className="flex-1">{children}</div>
-            </div>
-            <TailwindIndicator />
-          </ThemeProvider>
+          <div className="flex flex-col min-h-screen">
+            <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+              <div className="relative flex flex-col flex-1">
+                <SiteHeader />
+                <div className="flex-1">{children}</div>
+                <footer className="sticky bottom-0 border-t">
+                  <Footer />
+                </footer>
+              </div>
+              <TailwindIndicator />
+            </ThemeProvider>
+          </div>
 
           <noscript
-              dangerouslySetInnerHTML={{
+            dangerouslySetInnerHTML={{
               __html: `<iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PFJVBDC" height="0" width="0" style="display: none; visibility: hidden;" />`,
-              }}
+            }}
           />
         </body>
       </html>

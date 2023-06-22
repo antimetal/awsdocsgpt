@@ -1,7 +1,7 @@
 import * as React from "react"
+import { Icons } from "@/icons/icons"
 
 import { cn } from "@/lib/utils"
-import { Icons } from "@/components/icons"
 
 const Card = React.forwardRef<
   HTMLDivElement,
@@ -31,19 +31,27 @@ const CardHeader = React.forwardRef<
 CardHeader.displayName = "CardHeader"
 
 interface CardTitleProps extends React.HTMLAttributes<HTMLHeadingElement> {
-  link?: string;
+  link?: string
 }
 
 const CardTitle = React.forwardRef<HTMLHeadingElement, CardTitleProps>(
   ({ className, link, ...props }, ref) => (
     <h3
       ref={ref}
-      className={cn("text-lg font-semibold leading-none tracking-tight flex items-center justify-between", className)}
+      className={cn(
+        "text-lg font-semibold leading-none tracking-tight flex items-center justify-between",
+        className
+      )}
       {...props}
     >
       {props.children}
       {link && (
-        <a href={link} target="_blank" rel="noopener noreferrer" className="text-right text-xs text-orange-500">
+        <a
+          href={link}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-right text-xs text-orange-500"
+        >
           <div className="flex items-center justify-between ml-2">
             <Icons.external className="mr-1" />
           </div>
@@ -51,7 +59,7 @@ const CardTitle = React.forwardRef<HTMLHeadingElement, CardTitleProps>(
       )}
     </h3>
   )
-);
+)
 CardTitle.displayName = "CardTitle"
 
 const CardDescription = React.forwardRef<

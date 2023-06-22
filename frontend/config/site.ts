@@ -12,7 +12,9 @@ export const siteConfig = {
   ],
   links: {
     twitter: "https://twitter.com/sima_alexx",
-    github: "https://github.com/antimetal",
+    github: "https://github.com/alexy201/awsdocsgpt",
     docs: "https://ui.shadcn.com",
+    personal: "https://github.com/alexy201",
+    documentation: "https://docs.aws.amazon.com",
   },
 }

@@ -1,11 +1,16 @@
 import {
+  ArrowRight,
+  Cog,
   LucideProps,
   Moon,
+  Search,
+  Settings,
   SunMedium,
   Twitter,
-  Settings,
   type Icon as LucideIcon,
 } from "lucide-react"
+
+import logoSVG from "./logo"
 
 export type Icon = LucideIcon
 
@@ -14,15 +19,10 @@ export const Icons = {
   settings: Settings,
   moon: Moon,
   twitter: Twitter,
-  logo: (props: LucideProps) => (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" {...props}>
-      <image
-        href = "https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg"
-        width="24"
-        height="24"
-      />
-    </svg>
-  ),
+  search: Search,
+  in: ArrowRight,
+  logo: logoSVG,
+  cog: Cog,
   gitHub: (props: LucideProps) => (
     <svg viewBox="0 0 438.549 438.549" {...props}>
       <path
@@ -32,7 +32,22 @@ export const Icons = {
     </svg>
   ),
   external: (props: LucideProps) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" {...props} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-external-link"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      {...props}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="lucide lucide-external-link"
+    >
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+      <polyline points="15 3 21 3 21 9" />
+      <line x1="10" x2="21" y1="14" y2="3" />
     </svg>
   ),
 }
