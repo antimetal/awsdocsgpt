@@ -3,7 +3,7 @@ version: '3.8'
 services:
   web:
     build: .
-    command: uvicorn app.main:app --host 0.0.0.0
+    command: uvicorn app.main:app --host 0.0.0.0 --workers 5
     volumes:
       - .:/app
     ports:

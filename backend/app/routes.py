@@ -2,13 +2,13 @@ from fastapi import APIRouter
 import os
 import openai
 import numpy as np
-from pgvector.asyncpg import register_vector
 from app.schemas import query, search_response, chat_response
 import app.exceptions as exceptions
 from fastapi import Request
+import logging
 
 router = APIRouter()
-
+_logger = logging.getLogger(__name__)
 
 @router.post(
     "/chat",
@@ -17,17 +17,21 @@ router = APIRouter()
     response_description="Answer (string which represents the completion) and sources used",
 )
 async def chat_handler(request: Request, query: query):
+    _logger.info({"message": "Calling Chat Endpoint"})
     rows = await helper(request, query)
 
     pages = []
     content = (
-        """Please answer the following prompt truthfully and as accurately as possible. 
+        f"""Please answer the following IMPORTANT PROMPT truthfully and as accurately as possible. 
                 Use the following sources (which shall be denoted with a SOURCE TITLE and SOURCE CONTENT). 
                 Try to not directly copy the sources word-for-word. Remember, you help developers with their questions 
-                about the AWS documentation and MUST USE THE SOURCES to the best of your ability. You do not have to explicity
+                about the AWS documentation and TRY TO USE THE SOURCES AS CONTEXT to the best of your ability. However, you want to
+                mainly focus on answering the user prompt. Do not randomly use the sources that have nothing to
+                do with the question asked by the user. You do not have to explicity
                 mention the source names and which sources you used in your answer.
+                AGAIN PLEASE MAKE THE RESPONSE A {query.sentences.upper()} {query.sentences.upper()} {query.sentences.upper()} LENGTH THIS IS VERY IMPORTANT!!!
                 
-                Here is the PROMPT: """
+                Here is the IMPORTANT PROMPT: """
         + query.prompt
         + "\n\n Here are the SOURCES: \n\n"
     )
@@ -40,14 +44,25 @@ async def chat_handler(request: Request, query: query):
     messages = [
         {
             "role": "system",
-            "content": "You are a helpful and concise assistant that helps developers with their questions about the AWS documentation. Respond in approximately 3-5 sentences.",
+            "content": f"""You are a helpful and concise assistant that helps developers with their questions about the AWS documentation. 
+                       In your responses, when you want to include a header, include it like: # [your header].
+                       when you want to include a sub-header, include it like: ## [your sub-header].
+                       when you want to include a piece of code, include it like: ```[your entire code bit]```.
+                       For bold text, just render it like **bold text**. Render ordered/unordered lists in Markdown. 
+                       For links, render as [link title](https://www.example.com).
+                       Essentially just give your entire response as a Markdown document.
+                       PLEASE MAKE THE RESPONSE A {query.sentences.upper()} {query.sentences.upper()} {query.sentences.upper()} LENGTH THIS IS VERY IMPORTANT!!!
+                       If you are giving a SHORT or MEDIUM response, do not add a long response with [Answer] or an "Answer" heading. 
+                       Always try to keep track of your response length especially before you give the response.""",
         },
         {"role": "user", "content": content},
     ]
     try:
+        _logger.info({"message": "Using Chat Completion"})
         res = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=messages)
         reply = res["choices"][0]["message"]["content"]
     except:
+        _logger.error({"message": "Error generating chat completion"})
         raise exceptions.InvalidChatCompletionException
 
     return chat_response(answer=reply, sources=pages)
@@ -60,6 +75,7 @@ async def chat_handler(request: Request, query: query):
     response_description="Sources that match the prompt (in a list)",
 )
 async def search_handler(request: Request, query: query):
+    _logger.info({"message": "Calling Search Endpoint"})
     rows = await helper(request, query)
     response = []
     for row in rows:
@@ -70,18 +86,22 @@ async def search_handler(request: Request, query: query):
 
 async def helper(request: Request, query: query):
     try:
+        _logger.info({"message": "Creating embedding"})
         embedding = openai.Embedding.create(
             input=query.prompt, model="text-embedding-ada-002"
         )["data"][0]["embedding"]
         sql = "SELECT * FROM " + os.getenv("POSTGRES_SEARCH_FUNCTION") + "($1, $2, $3)"
     except:
+        _logger.error({"message": "Issue with creating an embedding."})
         raise exceptions.InvalidPromptEmbeddingException
     
     try:
-        res = await request.app.state.conn.fetch(
+        _logger.info({"message": "Querying Postgres"})
+        res = await request.app.state.db.fetch_rows(
             sql, np.array(embedding), query.similarity_threshold, query.results
         )
     except:
+        _logger.error({"message": "Issue with querying Postgres."})
         raise exceptions.InvalidPostgresQueryException
 
     return res
