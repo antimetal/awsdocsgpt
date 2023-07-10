@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { Bold } from "lucide-react"
 
 import { Label } from "@/components/ui/label"
 import { Toggle } from "@/components/ui/toggle"

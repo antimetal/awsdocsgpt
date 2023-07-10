@@ -14,6 +14,11 @@ module.exports = {
     },
     extend: {
       colors: {
+        antimetal: {
+          light: "#fb923c",
+          DEFAULT: "#f97316",
+          dark: "#ea580c",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

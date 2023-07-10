@@ -1,4 +1,3 @@
-import os, openai
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes import router as api_router
@@ -24,7 +23,6 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def startup():
-    openai.api_key = os.getenv("OPENAI_API_KEY")
     database_instance = db.Database()
     await database_instance.connect()
     app.state.db = database_instance
@@ -33,6 +31,6 @@ async def startup():
 
 @app.on_event("shutdown")
 async def shutdown():
-    if not app.state.db:
+    if app.state.db:
         await app.state.db.close()
     _logger.info({"message": "FastAPI shutdown event"})

@@ -1,6 +1,6 @@
 "use client"
 
-import { ChangeEvent, useState } from "react"
+import { useState } from "react"
 import { Icons } from "@/icons/icons"
 
 import { Button, buttonVariants } from "@/components/ui/button"
@@ -13,45 +13,47 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
+import { Input, KeyInput } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { TwoToggle } from "@/components/two-toggle"
-import { defaults } from "@/config/config"
-import { ComboBox } from "@/components/combobox"
 import { Slider } from "@/components/ui/slider"
+import { ComboBox } from "@/components/combobox"
+import { TwoToggle } from "@/components/two-toggle"
+import { getSettings, updateSettings } from "@/lib/settings"
+import { Settings } from "@/types/settings"
+import { DEFAULT_LIMITS } from "@/config/config"
 
 export function Settings() {
-  const check_mode =
-    typeof window !== "undefined" ? localStorage.getItem("mode") : null
-  const check_results =
-    typeof window !== "undefined" ? localStorage.getItem("results") : null
-  const check_sentences = 
-    typeof window !== 'undefined' ? localStorage.getItem('sentences') : null
-  const check_threshold = 
-    typeof window !== 'undefined' ? localStorage.getItem('threshold') : null
-  const [mode, setMode] = useState(check_mode || defaults['mode'])
-  const [results, setResults] = useState(check_results || defaults['results'])
-  const [sentences, setSentences] = useState(check_sentences || defaults['sentences'])
-  const [threshold, setThreshold] = useState(check_threshold || defaults['threshold'])
+  const cachedSettings = getSettings();
+  const [settings, setSettings] = useState<Settings>(cachedSettings);
+
+  const edgeResults = (key: string, value: string) => {
+    const newValue = Number(value)
+    if (newValue > DEFAULT_LIMITS.results_max) {
+      setSettings(previousSettings => ({ ...previousSettings, [key]: String(DEFAULT_LIMITS.results_max) }))
+    }else if (newValue < DEFAULT_LIMITS.results_min) {
+      setSettings(previousSettings => ({ ...previousSettings, [key]: String(DEFAULT_LIMITS.results_min) }))
+    }else if (isNaN(Number(newValue))) {
+      setSettings(previousSettings => ({ ...previousSettings, [key]: String(DEFAULT_LIMITS.results_min) }))
+    }else {
+      setSettings(previousSettings => ({ ...previousSettings, [key]: value }))
+    }
+  }
+
+  const handleUpdate = (key: string, value: string) => {
+    if (key == "results") {
+      edgeResults(key, value)
+    }else {
+      setSettings(previousSettings => ({ ...previousSettings, [key]: value }))
+    }
+  }
 
   const handleSliderChange = (value: number[]) => {
-    setThreshold(String(value));
-  };
+    handleUpdate("threshold", `${value}`)
+  }
 
   const handleSaveChanges = () => {
-    localStorage.setItem('mode', mode);
-    localStorage.setItem('sentences', sentences);
-    localStorage.setItem('threshold', threshold);
-    if (Number(results) < 1 || isNaN(Number(results))) {
-      setResults(String(1))
-      localStorage.setItem("results", "1")
-    } else if (Number(results) > 10) {
-      setResults(String(10))
-      localStorage.setItem("results", "10")
-    } else {
-      localStorage.setItem("results", results)
-    }
-  };
+    updateSettings(settings)
+  }
 
   return (
     <Dialog>
@@ -69,13 +71,13 @@ export function Settings() {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Settings</DialogTitle>
+          <DialogTitle>Customize your app settings.</DialogTitle>
           <DialogDescription>
-            Make changes to your settings here. Select your GPT mode, search result
-            count, and chat response length . Similarity (a number between 0 and 1) 
-            represents the relatedness of your prompt
-            to the search results. A higher decimal represents higher
-            similarity. Click save when you&apos;re done.
+            Choose your GPT mode, API Key, search result count, and chat response length. Use the similarity scale to measure the{` `}
+            closeness between your prompt and the search results—a higher value indicates stronger match.
+            <br />
+            <br />
+            Click “Save Changes” to confirm your settings.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -83,7 +85,19 @@ export function Settings() {
             <Label htmlFor="mode" className="text-right">
               Mode
             </Label>
-            <TwoToggle value={mode} onChange={setMode} />
+            <TwoToggle value={settings.mode} onChange={(value) => handleUpdate("mode", value)} />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="api_key" className="text-right">
+              OpenAI Key
+            </Label>
+            <KeyInput
+              id="api_key"
+              className="col-span-3"
+              defaultValue={settings.api_key}
+              placeholder="ex. sk-123456789"
+              onChange={(e) => handleUpdate("api_key", e.target.value)}
+            />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="results" className="text-right">
@@ -92,34 +106,32 @@ export function Settings() {
             <Input
               id="results"
               className="col-span-3"
-              min={1}
-              max={10}
+              min={DEFAULT_LIMITS.results_min}
+              max={DEFAULT_LIMITS.results_max}
+              defaultValue={settings.results}
               item="results"
-              onChange={(e) => setResults(e.target.value)}
+              onChange={(e) => handleUpdate("results", e.target.value)}
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="sentences" className="text-right">
               Response
             </Label>
-            <ComboBox
-              value={sentences}
-              onChange={setSentences}
-            />
+            <ComboBox value={settings.sentences} onChange={(value) => handleUpdate("sentences", value)} />
           </div>
-          <div className="grid grid-cols-12 my-2">
-            <Label htmlFor="threshold" className="text-center col-span-3">
+          <div className="my-2 grid grid-cols-12">
+            <Label htmlFor="threshold" className="col-span-3 text-center">
               Similarity
             </Label>
-            <Label className="text-center col-span-2">0.0</Label>
+            <Label className="col-span-2 text-center">0.0</Label>
             <Slider
-              value={[parseFloat(threshold)]}
+              value={[parseFloat(settings.threshold)]}
               onValueChange={handleSliderChange}
               max={0.9}
               step={0.05}
               className="col-span-5"
             />
-            <Label className="text-center col-span-2">0.9</Label>
+            <Label className="col-span-2 text-center">0.9</Label>
           </div>
         </div>
         <DialogFooter>

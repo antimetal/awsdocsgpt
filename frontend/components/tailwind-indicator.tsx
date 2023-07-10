@@ -1,5 +1,9 @@
+import { IS_PRODUCTION } from "@/config/config"
+
 export function TailwindIndicator() {
-  if (process.env.NODE_ENV === "production") return null
+  if (IS_PRODUCTION) {
+    return null
+  }
 
   return (
     <div className="fixed bottom-1 left-1 z-50 flex h-6 w-6 items-center justify-center rounded-full bg-gray-800 p-3 font-mono text-xs text-white">

@@ -25,6 +25,7 @@ class Database:
                     min_size=1,
                     max_size=20,
                     command_timeout=60,
+                    max_inactive_connection_lifetime=300,
                     host=self.host,
                     port=self.port,
                     user=self.user,
@@ -39,19 +40,18 @@ class Database:
     async def fetch_rows(self, query: str, *args):
         if not self._connection_pool:
             await self.connect()
-        else:
-            con = await self._connection_pool.acquire()
-            await register_vector(con)
-            try:
-                result = await con.fetch(query, *args)
-                return result
-            except Exception as e:
-                _logger.exception({"exception": e})
-            finally:
-                await self._connection_pool.release(con)
+        con = await self._connection_pool.acquire()
+        await register_vector(con)
+        try:
+            result = await con.fetch(query, *args)
+            return result
+        except Exception as e:
+            _logger.exception({"exception": e})
+        finally:
+            await self._connection_pool.release(con)
 
     async def close(self):
-        if not self._connection_pool:
+        if self._connection_pool:
             try:
                 await self._connection_pool.close()
                 _logger.info({"message": "Database pool connection closed"})

@@ -24,7 +24,7 @@ const CardHeader = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex flex-col space-y-1.5 p-6", className)}
+    className={cn("flex flex-col space-y-1.5 p-4 md:p-6", className)}
     {...props}
   />
 ))
@@ -39,7 +39,7 @@ const CardTitle = React.forwardRef<HTMLHeadingElement, CardTitleProps>(
     <h3
       ref={ref}
       className={cn(
-        "text-lg font-semibold leading-none tracking-tight flex items-center justify-between",
+        "flex items-center justify-between text-lg font-semibold leading-none tracking-tight",
         className
       )}
       {...props}
@@ -50,9 +50,9 @@ const CardTitle = React.forwardRef<HTMLHeadingElement, CardTitleProps>(
           href={link}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-right text-xs text-orange-500"
+          className="text-right text-xs text-antimetal"
         >
-          <div className="flex items-center justify-between ml-2">
+          <div className="ml-2 flex items-center justify-between">
             <Icons.external className="mr-1" />
           </div>
         </a>
@@ -60,6 +60,7 @@ const CardTitle = React.forwardRef<HTMLHeadingElement, CardTitleProps>(
     </h3>
   )
 )
+
 CardTitle.displayName = "CardTitle"
 
 const CardDescription = React.forwardRef<
@@ -72,14 +73,16 @@ const CardDescription = React.forwardRef<
     {...props}
   />
 ))
+
 CardDescription.displayName = "CardDescription"
 
 const CardContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
+  <div ref={ref} className={cn("mx-4 mb-4 md:mx-6 md:mb-6 pt-0", className)} {...props} />
 ))
+
 CardContent.displayName = "CardContent"
 
 const CardFooter = React.forwardRef<
@@ -88,10 +91,11 @@ const CardFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn(" flex items-center p-6 pt-0", className)}
+    className={cn(" flex items-center p-4 md:p-6 pt-0", className)}
     {...props}
   />
 ))
+
 CardFooter.displayName = "CardFooter"
 
 export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }

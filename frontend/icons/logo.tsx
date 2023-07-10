@@ -1,7 +1,7 @@
 import React from "react"
 import { LucideProps } from "lucide-react"
 
-const logoSVG = (props: LucideProps) => (
+const Logo = (props: LucideProps) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" {...props}>
     <g transform="translate(0, +6) scale(0.078)">
       <path
@@ -32,14 +32,14 @@ const logoSVG = (props: LucideProps) => (
         <path
           fillRule="evenodd"
           clipRule="evenodd"
-          fill="#FF9900"
+          fill="#f97316"
           d="M273.5,143.7c-32.9,24.3-80.7,37.2-121.8,37.2c-57.6,0-109.5-21.3-148.7-56.7c-3.1-2.8-0.3-6.6,3.4-4.4
                 c42.4,24.6,94.7,39.5,148.8,39.5c36.5,0,76.6-7.6,113.5-23.2C274.2,133.6,278.9,139.7,273.5,143.7z"
         />
         <path
           fillRule="evenodd"
           clipRule="evenodd"
-          fill="#FF9900"
+          fill="#f97316"
           d="M287.2,128.1c-4.2-5.4-27.8-2.6-38.5-1.3c-3.2,0.4-3.7-2.4-0.8-4.5c18.8-13.2,49.7-9.4,53.3-5
                 c3.6,4.5-1,35.4-18.6,50.2c-2.7,2.3-5.3,1.1-4.1-1.9C282.5,155.7,291.4,133.4,287.2,128.1z"
         />
@@ -48,4 +48,4 @@ const logoSVG = (props: LucideProps) => (
   </svg>
 )
 
-export default logoSVG
+export default Logo

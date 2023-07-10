@@ -2,32 +2,47 @@ import * as React from "react"
 
 import { Chat } from "@/components/chat"
 import { Search } from "@/components/search"
+import { UseChatHelpers } from 'ai/react'
 
-export enum cases {
+export enum Case {
   SEARCH = 1,
   CHAT = 2,
+}
+
+interface OutputComponentProps {
+  chat: number
+  isLoading: boolean
+  data: any
+  messages: UseChatHelpers['messages']
+  apiKeyListener: boolean
 }
 
 export function OutputComponent({
   chat,
   isLoading,
   data,
-}: {
-  chat: number
-  isLoading: boolean
-  data: any
-}) {
-  if (chat == cases.CHAT) {
+  messages,
+  apiKeyListener,
+}: OutputComponentProps) {
+  if (!apiKeyListener) {
+    switch (chat) {
+      case Case.SEARCH:
+        return <Search isLoading={isLoading} data={data} />
+      case Case.CHAT:
+        return (
+          <React.Fragment>
+            <Chat isLoading={isLoading} messages={messages} />
+            <Search isLoading={isLoading} data={data} />
+          </React.Fragment>
+        )
+      default:
+        return null
+    }
+  }else {
     return (
-      <React.Fragment>
-        <Chat isLoading={isLoading} data={data} />
-        <Search isLoading={isLoading} data={data} />
-      </React.Fragment>
+      <div className="text-center flex justify-center text-xl font-bold text-red-600">
+        Please Input a Valid API Key
+      </div>
     )
-  } else if (chat == cases.SEARCH) {
-    return <Search isLoading={isLoading} data={data} />
   }
-
-  // Handle other cases if needed
-  return null
 }

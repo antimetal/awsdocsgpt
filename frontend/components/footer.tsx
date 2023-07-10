@@ -8,16 +8,21 @@ import { siteConfig } from "@/config/site"
 import { buttonVariants } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { ThemeToggle } from "@/components/theme-toggle"
+import Image from "next/image"
 
 export function Footer() {
-  const { width, height } = useWindowSize()
+  const { width } = useWindowSize()
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background">
       <div className="container flex h-16 items-center space-x-4 sm:justify-between sm:space-x-0">
-        {width >= 600 && (
-          <Label className="text-gray-500 text-lg flex items-center justify-center italic h-full w-full">
-            Created by&nbsp;<a href={siteConfig.links.personal}>Alex Sima</a>
+        {width >= 800 && (
+          <Label className="flex h-full w-full items-center justify-center text-lg text-gray-500">
+            Created by&nbsp;<a href={siteConfig.links.personal}>Alex Sima</a>{/*, sponsored by&nbsp;
+            <a href={siteConfig.links.antimetal}>
+              <Image src="/antimetal.png" height={40} width={100} alt="Antimetal logo" />
+              Antimetal
+            </a>*/}
           </Label>
         )}
         <div className="absolute flex flex-1 items-center justify-end space-x-4">
@@ -33,7 +38,7 @@ export function Footer() {
                   variant: "ghost",
                 })}
               >
-                <Icons.gitHub className="h-5 w-5" />
+                <Icons.github className="h-5 w-5" />
                 <span className="sr-only">GitHub</span>
               </div>
             </Link>

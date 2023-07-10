@@ -2,7 +2,7 @@ from fastapi import APIRouter
 import os
 import openai
 import numpy as np
-from app.schemas import query, search_response, chat_response
+from app.schemas import query, message, search_response, chat_response
 import app.exceptions as exceptions
 from fastapi import Request
 import logging
@@ -29,7 +29,9 @@ async def chat_handler(request: Request, query: query):
                 mainly focus on answering the user prompt. Do not randomly use the sources that have nothing to
                 do with the question asked by the user. You do not have to explicity
                 mention the source names and which sources you used in your answer.
-                AGAIN PLEASE MAKE THE RESPONSE A {query.sentences.upper()} {query.sentences.upper()} {query.sentences.upper()} LENGTH THIS IS VERY IMPORTANT!!!
+                PLEASE MAKE THE RESPONSE A {query.sentences.upper()} {query.sentences.upper()} {query.sentences.upper()} LENGTH THIS IS VERY IMPORTANT!!!
+                If you are giving a SHORT or MEDIUM response, do not add a long response with [Answer] or an "Answer" heading. 
+                Always try to keep track of your response length especially before you give the response.
                 
                 Here is the IMPORTANT PROMPT: """
         + query.prompt
@@ -41,31 +43,18 @@ async def chat_handler(request: Request, query: query):
         content += "SOURCE TITLE: " + dic["page_title"] + "\n"
         content += "SOURCE CONTENT: " + dic["content"]
 
-    messages = [
-        {
-            "role": "system",
-            "content": f"""You are a helpful and concise assistant that helps developers with their questions about the AWS documentation. 
+    messages = []
+    messages.append(message(role="system", content=f"""You are a helpful and concise assistant that helps developers with their questions about the AWS documentation. 
                        In your responses, when you want to include a header, include it like: # [your header].
-                       when you want to include a sub-header, include it like: ## [your sub-header].
+                       when you want to include a sub-header, include it like: ## [your subs-header].
                        when you want to include a piece of code, include it like: ```[your entire code bit]```.
+                       MAKE SURE TO FORMAT ALL CODE CORRECTLY!!! INCLUDE PROPER INDENTING AND SPACING!!! 
                        For bold text, just render it like **bold text**. Render ordered/unordered lists in Markdown. 
                        For links, render as [link title](https://www.example.com).
-                       Essentially just give your entire response as a Markdown document.
-                       PLEASE MAKE THE RESPONSE A {query.sentences.upper()} {query.sentences.upper()} {query.sentences.upper()} LENGTH THIS IS VERY IMPORTANT!!!
-                       If you are giving a SHORT or MEDIUM response, do not add a long response with [Answer] or an "Answer" heading. 
-                       Always try to keep track of your response length especially before you give the response.""",
-        },
-        {"role": "user", "content": content},
-    ]
-    try:
-        _logger.info({"message": "Using Chat Completion"})
-        res = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=messages)
-        reply = res["choices"][0]["message"]["content"]
-    except:
-        _logger.error({"message": "Error generating chat completion"})
-        raise exceptions.InvalidChatCompletionException
+                       Essentially just give your entire response as a Markdown document."""))
+    messages.append(message(role="user", content=content))
 
-    return chat_response(answer=reply, sources=pages)
+    return chat_response(messages=messages, sources=pages)
 
 
 @router.post(
@@ -87,8 +76,11 @@ async def search_handler(request: Request, query: query):
 async def helper(request: Request, query: query):
     try:
         _logger.info({"message": "Creating embedding"})
+        _logger.info({"api_key": query.api_key})
         embedding = openai.Embedding.create(
-            input=query.prompt, model="text-embedding-ada-002"
+            api_key=query.api_key,
+            input=query.prompt, 
+            model="text-embedding-ada-002"
         )["data"][0]["embedding"]
         sql = "SELECT * FROM " + os.getenv("POSTGRES_SEARCH_FUNCTION") + "($1, $2, $3)"
     except:
@@ -100,8 +92,8 @@ async def helper(request: Request, query: query):
         res = await request.app.state.db.fetch_rows(
             sql, np.array(embedding), query.similarity_threshold, query.results
         )
-    except:
-        _logger.error({"message": "Issue with querying Postgres."})
+    except Exception as e:
+        _logger.error({"message": "Issue with querying Postgres." + str(e)})
         raise exceptions.InvalidPostgresQueryException
 
     return res

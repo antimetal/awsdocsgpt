@@ -1,9 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { useRef, useEffect } from 'react';
+import { useEffect, useRef } from "react"
 import { cn } from "@/lib/utils"
-import { defaults } from "@/config/config";
 
 export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -14,24 +13,6 @@ export interface InputProps
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, min, max, item, ...props }, ref) => {
-
-    const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-      const newValue = Number(event.target.value)
-      if (max !== undefined) {
-        if (newValue > max) {
-          event.target.value = String(max)
-        }
-      }
-      if (min !== undefined) {
-        if (newValue < min) {
-          event.target.value = String(min)
-        }
-      }
-      if (isNaN(Number(newValue))) {
-        event.target.value = String(min)
-      }
-    }
-
     return (
       <input
         type={type}
@@ -43,8 +24,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {...props}
         max={max}
         min={min}
-        defaultValue = {localStorage.getItem(item) || defaults[item]}
-        onBlur={handleInputChange}
+        defaultValue={props.defaultValue}
       />
     )
   }
@@ -52,31 +32,37 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 Input.displayName = "Input"
 
 export interface TextareaProps
-  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {}
+  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+  mobile: boolean
+}
 
 const TextInput = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, ...props }, ref) => {
-    const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  ({ className, mobile, ...props }, ref) => {
+    const textareaRef = useRef<HTMLTextAreaElement | null>(null)
 
     useEffect(() => {
-      const textarea = textareaRef.current!;
+      const textarea = textareaRef.current!
 
       const adjustTextareaHeight = () => {
-        textarea.style.height = 'auto';
-        textarea.style.height = `${Math.max(textarea.scrollHeight + 10, 80)}px`;
-      };
+        textarea.style.height = "auto"
+        if (mobile){
+          textarea.style.height = `${textarea.scrollHeight + 3}px`
+        }else {
+          textarea.style.height = `${Math.max(textarea.scrollHeight + 10, 80)}px`
+        }
+      }
 
-      textarea.addEventListener('input', adjustTextareaHeight);
+      textarea.addEventListener("input", adjustTextareaHeight)
 
       return () => {
-        textarea.removeEventListener('input', adjustTextareaHeight);
-      };
-    }, []);
+        textarea.removeEventListener("input", adjustTextareaHeight)
+      }
+    }, [])
 
     return (
       <textarea
         className={cn(
-          "flex h-20 w-full rounded-lg border border-input bg-transparent px-16 py-2 text-xl ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+          "flex h-18 md:h-20 w-full rounded-lg border border-input bg-transparent px-14 md:px-16 py-2 text-md md:text-xl ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
           className
         )}
         ref={textareaRef}
@@ -87,4 +73,24 @@ const TextInput = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
 )
 TextInput.displayName = "TextInput"
 
-export { Input, TextInput }
+export interface KeyInputProps
+  extends React.InputHTMLAttributes<HTMLInputElement> {
+}
+
+const KeyInput = React.forwardRef<HTMLInputElement, KeyInputProps>(
+  ({ className, ...props }, ref) => {
+    return (
+      <input
+        className={cn(
+          "flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+          className
+        )}
+        ref={ref}
+        {...props}
+      />
+    )
+  }
+)
+KeyInput.displayName = "KeyInput"
+
+export { Input, TextInput, KeyInput }

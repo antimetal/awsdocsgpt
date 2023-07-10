@@ -3,21 +3,15 @@
 import * as React from "react"
 import { Check, ChevronsUpDown } from "lucide-react"
 
+import { getSettings } from "@/lib/settings"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command"
+import { Command, CommandGroup, CommandItem } from "@/components/ui/command"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { defaults } from "@/config/config"
 
 const options = [
   {
@@ -31,10 +25,17 @@ const options = [
   {
     value: "long",
     label: "Long",
-  }
+  },
 ]
 
-export function ComboBox({ value, onChange }: { value: string, onChange: (value: string) => void }) {
+export function ComboBox({
+  value,
+  onChange,
+}: {
+  value: string
+  onChange: (value: string) => void
+}) {
+  const settings = getSettings()
   const [open, setOpen] = React.useState(false)
 
   return (
@@ -48,7 +49,7 @@ export function ComboBox({ value, onChange }: { value: string, onChange: (value:
         >
           {value
             ? options.find((options) => options.value === value)?.label
-            : localStorage.getItem("sentence") || defaults["sentence"]}
+            : settings.sentences}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -58,7 +59,7 @@ export function ComboBox({ value, onChange }: { value: string, onChange: (value:
             {options.map((options) => (
               <CommandItem
                 key={options.value}
-                onSelect={(currentValue) => {
+                onSelect={(currentValue: any) => {
                   onChange(currentValue)
                   setOpen(false)
                 }}
@@ -66,7 +67,7 @@ export function ComboBox({ value, onChange }: { value: string, onChange: (value:
                 <Check
                   className={cn(
                     "mr-2 h-4 w-4",
-                    value === options.value ? "opacity-100" : "opacity-0"
+                    value !== options.value && "opacity-0"
                   )}
                 />
                 {options.label}
