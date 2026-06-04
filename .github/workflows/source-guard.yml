@@ -1,0 +1,38 @@
+name: Source Guard
+on:
+  push:
+    branches: ["**"]
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/create-github-app-token@v1
+        id: tok
+        with:
+          app-id: ${{ secrets.INTERNAL_DEV_TOOLS_APP_ID }}
+          private-key: ${{ secrets.INTERNAL_DEV_TOOLS_APP_KEY }}
+          owner: antimetal
+          repositories: .github
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          repository: antimetal/.github
+          token: ${{ steps.tok.outputs.token }}
+          path: .source-guard
+      - id: scan
+        uses: ./.source-guard/.github/actions/malware-scan
+      - name: Alert Slack
+        if: steps.scan.outputs.infected == 'true'
+        continue-on-error: true
+        uses: slackapi/slack-github-action@v2.0.0
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload: |
+            channel: "#bugs"
+            text: ":rotating_light: *Malware signature pushed* to `${{ github.repository }}` @ `${{ github.ref_name }}` by `${{ github.actor }}`."
+      - name: Fail the run on a hit
+        if: steps.scan.outputs.infected == 'true'
+        run: exit 1
